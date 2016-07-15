@@ -1,18 +1,19 @@
 package function;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.Statement;
-import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -26,17 +27,16 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import common.DBcom;
-import common.Round;
 import login.Login;
-
-import java.awt.Color;
-import java.awt.Font;
-import javax.swing.SwingConstants;
+import common.Data;
+import common.Round;
+import entity.Record;
+import entity.User;
 
 class SearchDialog extends JDialog {
 
@@ -75,7 +75,8 @@ class SearchDialog extends JDialog {
 		int screenHIGH = screensize.height;
 		int FrameWith = 450;
 		int FrameHith = 362;
-		setBounds((screenWIDE - FrameWith) / 2, (screenHIGH - FrameHith) / 2, 450, 445);
+		setBounds((screenWIDE - FrameWith) / 2, (screenHIGH - FrameHith) / 2,
+				450, 445);
 		// setBounds(100, 100, 369, 362);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -83,7 +84,7 @@ class SearchDialog extends JDialog {
 		contentPanel.setLayout(null);
 
 		// 检查数据库驱动
-		DBcom db = new DBcom();
+		// DBcom db = new DBcom();
 
 		{
 
@@ -152,8 +153,9 @@ class SearchDialog extends JDialog {
 
 			{
 				typeComboBox = new JComboBox();
-				String[] kind = { "餐饮", "电子产品", "服饰", "娱乐", "通信", "书籍", "日用品", "医疗", "旅游", "丢失", "工资", "奖金", "偶然获得",
-						"租金收入", "股利股息", "社会福利", "其他支出", "其他收入" };
+				String[] kind = { "餐饮", "电子产品", "服饰", "娱乐", "通信", "书籍", "日用品",
+						"医疗", "旅游", "丢失", "工资", "奖金", "偶然获得", "租金收入", "股利股息",
+						"社会福利", "其他支出", "其他收入" };
 				for (int i = 0; i < kind.length; i++)
 					typeComboBox.addItem(kind[i]);
 				typeComboBox.setBounds(80, 65, 125, 21);
@@ -207,86 +209,94 @@ class SearchDialog extends JDialog {
 
 			okButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					String query = "select * from economic where userid= " + Login.user.getID() + " ";
-					if (timeCheckBox.isSelected()) {
-						int year = Integer.parseInt(yearComboBox.getSelectedItem() + "");
-						int month = Integer.parseInt(monthComboBox.getSelectedItem() + "");
-						query += "and year='" + year + "'and month='" + month + "' ";
-					}
-					if (typeCheckBox.isSelected()) {
-						String kd = (String) typeComboBox.getSelectedItem();
-						query += "and kind='" + kd + "' ";
-					}
+					if (Data.linkTest()) {
 
-					query += "order by id";
-
-					if (!(timeCheckBox.isSelected() || typeCheckBox.isSelected()))
-						query = "select * from economic where userid = " + Login.user.getID() + " order by id";
-
-					Vector columnNames = new Vector();
-					columnNames.add("日期");
-					columnNames.add("支出");
-					columnNames.add("收入");
-					columnNames.add("当时余额");
-					columnNames.add("种类");
-					columnNames.add("具体内容");
-
-					double amountin = 0, amountout = 0, balanceamount = 0;
-					Vector<Vector<String>> rowData = new Vector();
-
-					try {
-						// 从数据库读取用户信息
-						Statement st = db.initState();
-
-						// 开始条件查询
-						// rs = st.executeQuery(query);
-						ResultSet rs = db.query(query);
-
-						System.out.println(query);
-
-						while (rs.next()) {
-							// 将信息写到表格项中
-							Vector<String> row = new Vector<String>();
-							String s1 = rs.getInt("year") + "." + rs.getInt("month") + "." + rs.getInt("day") + " "
-									+ rs.getString("time");
-							double moneyout = rs.getDouble("moneyout");
-							double moneyin = rs.getDouble("moneyin");
-							double balance = rs.getDouble("balance");
-							String s2 = rs.getString("kind");
-							String s3 = rs.getString("detail");
-							if (moneyin != 0)
-								amountin = amountin + moneyin;
-							if (moneyout != 0)
-								amountout = amountout + moneyout;
-							row.add(s1);
-							row.add("" + Round.round(moneyout));
-							row.add("" + Round.round(moneyin));
-							row.add("" + Round.round(balance));
-							row.add(s2);
-							row.add(s3);
-							rowData.add(row);
-							System.out
-									.println(s1 + " " + moneyout + " " + moneyin + " " + balance + " " + s2 + " " + s3);
+						String query = "select * from economic where userid= "
+								+ Login.user.getID() + " ";
+						if (timeCheckBox.isSelected()) {
+							int year = Integer.parseInt(yearComboBox
+									.getSelectedItem() + "");
+							int month = Integer.parseInt(monthComboBox
+									.getSelectedItem() + "");
+							query += "and year='" + year + "'and month='"
+									+ month + "' ";
 						}
-						db.close(rs);
-					} catch (Exception e1) {
-						e1.printStackTrace();
+						if (typeCheckBox.isSelected()) {
+							String kd = (String) typeComboBox.getSelectedItem();
+							query += "and kind='" + kd + "' ";
+						}
+
+						query += "order by id";
+
+						if (!(timeCheckBox.isSelected() || typeCheckBox
+								.isSelected()))
+							query = "select * from economic where userid = "
+									+ Login.user.getID() + " order by id";
+
+						Vector columnNames = new Vector();
+						columnNames.add("日期");
+						columnNames.add("支出");
+						columnNames.add("收入");
+						columnNames.add("当时余额");
+						columnNames.add("种类");
+						columnNames.add("具体内容");
+
+						double amountin = 0, amountout = 0, balanceamount = 0;
+						Vector<Vector<String>> rowData = new Vector();
+
+						List<Record> Records = new ArrayList<Record>();
+
+						Records = Data.search(query);
+						if (Records != null) {
+							Iterator it = Records.iterator();
+							while (it.hasNext()) {
+								Record record = (Record) it.next();
+
+								// 将信息写到表格项中
+
+								Vector<String> row = new Vector<String>();
+								String s1 = record.getYear() + "."
+										+ record.getMonth() + "."
+										+ record.getDay() + " "
+										+ record.getTime();
+								double moneyout = record.getMoneyout();
+								double moneyin = record.getMoneyin();
+								double balance = record.getBalance();
+								String s2 = record.getKind();
+								String s3 = record.getDetail();
+								if (moneyin != 0)
+									amountin = amountin + moneyin;
+								if (moneyout != 0)
+									amountout = amountout + moneyout;
+								row.add(s1);
+								row.add("" + Round.round(moneyout));
+								row.add("" + Round.round(moneyin));
+								row.add("" + Round.round(balance));
+								row.add(s2);
+								row.add(s3);
+								rowData.add(row);
+							}
+						}
+						System.out.println(query);		
+
+						table = new JTable(rowData, columnNames);
+						table.getColumnModel().getColumn(0)
+								.setPreferredWidth(190);
+
+						// 把表格添加到JScrollPane中
+						System.out.println("1");
+
+						if (sp != null)
+							sp.setVisible(false);
+						sp = new JScrollPane(table);
+						sp.setBounds(10, 150, 430, 152);
+						contentPanel.add(sp);
+						incomeField.setText(Round.round(amountin) + "");
+						expenseField.setText(Round.round(amountout) + "");
+
+					}else{
+						JOptionPane.showMessageDialog(null, "无法连接到服务器，请检查网络连接");
 					}
-
-					table = new JTable(rowData, columnNames);
-					table.getColumnModel().getColumn(0).setPreferredWidth(190);
-
-					// 把表格添加到JScrollPane中
-					System.out.println("1");
-
-					if (sp != null)
-						sp.setVisible(false);
-					sp = new JScrollPane(table);
-					sp.setBounds(10, 150, 430, 152);
-					contentPanel.add(sp);
-					incomeField.setText(Round.round(amountin) + "");
-					expenseField.setText(Round.round(amountout) + "");
-
 				}
 			});
 		}

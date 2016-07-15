@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="incometype">
+        <item>工资</item>
+        <item>奖金</item>
+        <item>偶然获得</item>
+        <item>租金收入</item>
+        <item>股利股息</item>
+        <item>社会福利</item>
+        <item>其他收入</item>
+    </string-array>
+    <string-array name="expensetype">
+        <item>餐饮</item>
+        <item>服饰</item>
+        <item>娱乐</item>
+        <item>通信</item>
+        <item>书籍</item>
+        <item>医疗</item>
+        <item>旅游</item>
+        <item>丢失</item>
+        <item>日用品</item>
+        <item>电子产品</item>
+        <item>其他支出</item>
+    </string-array>
+    <string-array name="alltype">
+        <item>工资</item>
+        <item>奖金</item>
+        <item>偶然获得</item>
+        <item>租金收入</item>
+        <item>股利股息</item>
+        <item>社会福利</item>
+        <item>其他收入</item>
+        <item>餐饮</item>
+        <item>服饰</item>
+        <item>娱乐</item>
+        <item>通信</item>
+        <item>书籍</item>
+        <item>医疗</item>
+        <item>旅游</item>
+        <item>丢失</item>
+        <item>日用品</item>
+        <item>电子产品</item>
+        <item>其他支出</item>
+    </string-array>
+</resources>

@@ -18,6 +18,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -28,7 +30,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
-import common.DBcom;
+import common.Data;
+import entity.Record;
 import login.Login;
 
 class RecordDialog extends JDialog {
@@ -87,7 +90,7 @@ class RecordDialog extends JDialog {
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		
-		DBcom db=new DBcom();
+		//DBcom db=new DBcom();
 		
 		contentPanel.setLayout(null);
 		{
@@ -165,22 +168,17 @@ class RecordDialog extends JDialog {
 				getRootPane().setDefaultButton(okButton);
 				okButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
+						if (Data.linkTest()) {
 						if (!(textField_1.getText().equals(""))
 								&& !(textField.getText().equals(""))) {
-							Statement st=db.initState();
-							try {	
-//								ResultSet rs1 = st
-//										.executeQuery("select * from economic order by id DESC");
-								ResultSet rs1=db.query("select * from economic where userid="+Login.user.getID()+" order by id DESC");
-								if(rs1.first()){
-									balance = rs1.getDouble("balance");
-								}else{
-									System.out.println("您还未有记录！");
-								}
-								
-							} catch (SQLException e1) {
-								e1.printStackTrace();
-							}
+							
+							List<Record> records = Data.search("select * from economic where userid="+Login.user.getID()+" order by id DESC");
+							Iterator it = records.iterator();
+							
+							Record record = (Record) it.next();								
+							
+							balance = record.getBalance();							
+							
 							GregorianCalendar getMessageTime = new GregorianCalendar();
 							year = getMessageTime.get(Calendar.YEAR);
 							month = getMessageTime.get(Calendar.MONTH) + 1;
@@ -190,9 +188,7 @@ class RecordDialog extends JDialog {
 							SimpleDateFormat sdf = new SimpleDateFormat(
 									"HHmmss");
 							time = sdf.format(d);
-							// time=getMessageTime.get(Calendar.HOUR_OF_DAY)
-							// +""+ getMessageTime.get(Calendar.MINUTE) +
-							// ""+getMessageTime.get(Calendar.SECOND);
+
 							detail = textField_1.getText();
 							if (k == 1) {
 								try {
@@ -203,25 +199,24 @@ class RecordDialog extends JDialog {
 											"请输入数值", "提示",
 											JOptionPane.INFORMATION_MESSAGE);
 								}
-								balance = balance - out;
-								try {
-									st.executeUpdate("insert into economic (year,month,day,time,kind,moneyout,balance,detail,userid) values("
-											+ year
-											+ ","
-											+ month
-											+ ","
-											+ day
-											+ ",'"
-											+ time
-											+ "','"
-											+ kind
-											+ "','"
-											+ out
-											+ "','"
-											+ balance
-											+ "','" + detail + "',"+Login.user.getID()+")");
-									db.close(null);
-
+								balance = balance - out;								
+								
+								String query="insert into economic (year,month,day,time,kind,moneyout,balance,detail,userid) values("
+								+ year
+								+ ","
+								+ month
+								+ ","
+								+ day
+								+ ",'"
+								+ time
+								+ "','"
+								+ kind
+								+ "','"
+								+ out
+								+ "','"
+								+ balance
+								+ "','" + detail + "',"+Login.user.getID()+")";
+								if(Data.modify(query)){
 									owner.setLblNewLabel(owner.getLblNewLabel()
 											+ out);
 									owner.setLblNewLabel_2(owner
@@ -234,9 +229,14 @@ class RecordDialog extends JDialog {
 									setVisible(false);
 									textField.setText("");
 									textField_1.setText("");
-								} catch (SQLException e1) {
-									e1.printStackTrace();
+								}else{
+									JOptionPane.showMessageDialog(null,
+											"记录失败请检查网络连接", "提示",
+											JOptionPane.INFORMATION_MESSAGE);
 								}
+								
+								
+								
 							} else if (k == 2) {
 								try {
 									in = Double.parseDouble(textField.getText());
@@ -247,8 +247,8 @@ class RecordDialog extends JDialog {
 								}
 
 								balance = balance + in;
-								try {
-									st.executeUpdate("insert into economic (year,month,day,time,kind,moneyin,balance,detail,userid) values("
+								
+								String query="insert into economic (year,month,day,time,kind,moneyin,balance,detail,userid) values("
 											+ year
 											+ ","
 											+ month
@@ -262,9 +262,8 @@ class RecordDialog extends JDialog {
 											+ in
 											+ "','"
 											+ balance
-											+ "','" + detail + "',"+Login.user.getID()+")");
-									db.close(null);
-
+											+ "','" + detail + "',"+Login.user.getID()+")";
+								if(Data.modify(query)){
 									owner.setLblNewLabel_1(owner
 											.getLblNewLabel_1() + in);
 									owner.setLblNewLabel_3(owner
@@ -277,9 +276,13 @@ class RecordDialog extends JDialog {
 									setVisible(false);
 									textField.setText("");
 									textField_1.setText("");
-								} catch (SQLException e1) {
-									e1.printStackTrace();
+								}else{
+									JOptionPane.showMessageDialog(null,
+											"记录失败请检查网络连接", "提示",
+											JOptionPane.INFORMATION_MESSAGE);
 								}
+								
+								
 							}
 						} else {
 							if (textField.getText().equals(""))
@@ -287,6 +290,11 @@ class RecordDialog extends JDialog {
 							if (textField_1.getText().equals(""))
 								warn2.setText("内容不能为空!");
 						}
+					}else{
+						JOptionPane.showMessageDialog(null,
+								"无法连接到服务器，请检查网络连接", "提示",
+								JOptionPane.INFORMATION_MESSAGE);
+					}
 					}
 				});
 			}

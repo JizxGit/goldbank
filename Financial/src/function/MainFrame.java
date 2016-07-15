@@ -95,7 +95,6 @@ class MainFrame extends JFrame {
 		int FrameHith = 310;
 		setBounds((screenWIDE - FrameWith) / 2, (screenHIGH - FrameHith) / 2,
 				FrameWith, FrameHith);
-		// setBounds(100, 100, 392, 248);
 		
 		contentPane = new PhotoPanel(new ImageIcon("bg.jpg").getImage());
 		
@@ -144,18 +143,6 @@ class MainFrame extends JFrame {
 		lblNewLabel_3.setBounds(209, 82, 80, 15);
 		contentPane.add(lblNewLabel_3);
 
-		final JRadioButton radioButton = new JRadioButton("按月份");
-		radioButton.setSelected(true);
-		radioButton.setBounds(220, 123, 73, 23);
-		contentPane.add(radioButton);
-
-		final JRadioButton radioButton_1 = new JRadioButton("按种类");
-		radioButton_1.setBounds(295, 123, 85, 23);
-		contentPane.add(radioButton_1);
-
-		ButtonGroup g1 = new ButtonGroup();
-		g1.add(radioButton_1);
-		g1.add(radioButton);
 
 		final JRadioButton radioButton_2 = new JRadioButton("支出");
 		radioButton_2.setSelected(true);
@@ -205,50 +192,12 @@ class MainFrame extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				search=new SearchDialog(MainFrame.this);
 				search.setVisible(true);
-				
-//				if (radioButton.isSelected()) {
-//					if(sear2exist==1)
-//					{	sear2.setTextNull();
-//						sear2.setVisible(true);
-//					}
-//					else
-//					{
-//						sear2 = new SearchDialog2(MainFrame.this);
-//						sear2exist=1;
-//						sear2.setTextNull();
-//						sear2.setVisible(true);
-//					}
-//				}
-//
-//				else if (radioButton_1.isSelected()) {
-//					if(sear1exist==1)
-//					{	sear1.setVisible(true);
-//						sear1.setTextNull();
-//					}
-//					else
-//					{
-//						sear1 = new SearchDialog1(MainFrame.this);
-//						sear1exist=1;
-//						sear1.setVisible(true);
-//						sear1.setTextNull();
-//					}
-//				}
 
 			}
 		});
 		btnNewButton_1.setBounds(241, 157, 93, 36);
 		contentPane.add(btnNewButton_1);
 
-		JButton btnNewButton_2 = new JButton("支出统计图");
-		btnNewButton_2.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-					stat = new StatisticsDialog(MainFrame.this);
-					stat.setVisible(true);
-			}
-		});
-		btnNewButton_2.setBounds(155, 210, 100, 36);
-		contentPane.add(btnNewButton_2);
-		
 		JMenuBar menuBar = new JMenuBar();
 		this.setJMenuBar(menuBar);
 		

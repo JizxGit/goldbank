@@ -9,9 +9,10 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.sql.ResultSet;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,10 +23,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import common.DBcom;
-import login.Login; 
+import login.Login;
+import common.Data;
 
-public class SignUp implements ActionListener,KeyListener ,FocusListener {
+
+
+public class SignUp implements ActionListener,FocusListener {
 
 	JFrame frame;
 	private JTextField textField;
@@ -75,7 +78,7 @@ public class SignUp implements ActionListener,KeyListener ,FocusListener {
 	public void initialize() {
 		frame = new JFrame();
 		frame.setTitle("\u6CE8\u518C");
-		//frame.setBounds(100, 100, 450, 412);
+		
 		Toolkit kit = Toolkit.getDefaultToolkit();
 		Dimension screensize = kit.getScreenSize();
 		int screenWIDE = screensize.width;
@@ -133,25 +136,7 @@ public class SignUp implements ActionListener,KeyListener ,FocusListener {
 		frame.getContentPane().add(label_5);
 		
 		JButton button = new JButton("注册");
-		/*button.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				String astring="" ;
-				String aname=textField.getText() ;
-				String aid=textField_1.getText() ;
-				String apwd=passwordField.getText() ;
-				String amail=textField_5.getText() ;
-				astring="insert into user values("+
-						aid+","+
-                        "'"+aname+"',"+
-                        "'"+apwd+"',"+
-                        "'"+amail+"',"+
-                        "''"+
-                        ");";
-				DBHelper a = new DBHelper(astring);
-				frame.setVisible(false);
-				
-			}
-		});*/
+	
 		button.addActionListener(this);
 
 		button.setBounds(77, 262, 93, 23);
@@ -191,30 +176,11 @@ public class SignUp implements ActionListener,KeyListener ,FocusListener {
 		passwordField_1.addFocusListener(this);
 		textField_5.addFocusListener(this);
 	}
-	
-	public void keyTyped(KeyEvent e) {
-        // TODO Auto-generated method stub
-         
-    }
-	
-    public void keyPressed(KeyEvent e) {
-        // TODO Auto-generated method stub
-         
-    }
-     
-    public void keyReleased(KeyEvent e) {
-        // TODO Auto-generated method stub
-         
-    }
-     
-       
+	     
     //文本框焦点事件处理
     public void focusGained(FocusEvent e) {
         // TODO Auto-generated method stub
-         
-         
-         
-    }
+        }
     
     public void focusLost(FocusEvent e) {
         // TODO Auto-generated method stub
@@ -222,7 +188,6 @@ public class SignUp implements ActionListener,KeyListener ,FocusListener {
         String pass=String.valueOf(passwordField.getPassword());
         String repass=String.valueOf(passwordField_1.getPassword());
         String mailString=textField_5.getText().trim();   
-
          
         if (e.getSource()==textField) {
             if (nameString.equals("")) {
@@ -232,8 +197,7 @@ public class SignUp implements ActionListener,KeyListener ,FocusListener {
                  
             }else {
                 lblNewLabel.setText("正确");
-                lblNewLabel.setForeground(Color.green);
-                
+                lblNewLabel.setForeground(Color.green);                
             }           
         }
         if (e.getSource()==passwordField) {
@@ -266,13 +230,11 @@ public class SignUp implements ActionListener,KeyListener ,FocusListener {
             if(!isEmail(mailString)){
             	System.out.println("邮箱格式不正确");
                 label_1.setText("邮箱格式不正确！");
-                label_1.setForeground(Color.red);  
-            	
+                label_1.setForeground(Color.red);              	
             }
             	else {
             		label_1.setText("正确");
-            		label_1.setForeground(Color.green);
-                
+            		label_1.setForeground(Color.green);                
             }           
         }
         
@@ -281,51 +243,46 @@ public class SignUp implements ActionListener,KeyListener ,FocusListener {
 	
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
+		if (Data.linkTest()) {
 		 String btnstring = e.getActionCommand();
 	      if (btnstring.equals("注册")) {
-	          //System.out.println("提交");
-	           
+
 	          String nameString=textField.getText().trim();
 	          String pass=String.valueOf(passwordField.getPassword());
 	          String repass=String.valueOf(passwordField_1.getPassword());
 	          String mailString=textField_5.getText().trim(); 
-	          String sql="select count(*) from user";
-	          int id=0;
-	          DBcom db=new DBcom();
-              Statement st=db.initState();
-	          try {   	
-	              ResultSet rs = db.query(sql);
-	              while (rs.next())
-	              {
-	            	  id = rs.getInt("count(*)");
-	            	  System.out.println(rs);
-	              }
-	          } catch (Exception e1) {  
-	              e1.printStackTrace();  
-	          }  
-	          id++;
-	          String idString=id+"";
+	         	          
+	          String query;	        
+	          
 	          if (!nameString.equals("") && !pass.equals("") && pass.equals(repass) && !mailString.equals("")&&isEmail(mailString)) {
 	              System.out.println("注册");
-	               sql=
+	              if(UserCheck.CheckUsername(nameString)){
+	              query=
 	                      "insert into user values("+
-	                    		  "'"+idString+"',"+
+	                    		  "null,"+
 	                              "'"+nameString+"',"+
 	                              "'"+pass+"',"+
 	                              "'"+mailString+"',"+
 	                              "''"+
 	                              ")";
 	                               
-	              System.out.println(sql);
-	              db.update(sql);
-	              JOptionPane.showMessageDialog(null,"注册成功"
-	              		+ "           您的id为"+idString,"提示",JOptionPane.INFORMATION_MESSAGE);
-				frame.setVisible(false);
-
+	              System.out.println(query);
+	              if(Data.modify(query))	              
+	            	  JOptionPane.showMessageDialog(null,"注册成功","提示",JOptionPane.INFORMATION_MESSAGE);
+	              else
+	            	  JOptionPane.showMessageDialog(null,"注册失败请检查网络连接","提示",JOptionPane.INFORMATION_MESSAGE);
+				
+	              frame.setVisible(false);
 
 	          }           
+	         }else 
+	         {
+	        	 JOptionPane.showMessageDialog(null,"用户名重复","注册失败",JOptionPane.INFORMATION_MESSAGE);
+	         }
 	      }
-		
+		}else{
+			JOptionPane.showMessageDialog(null,"连接服务器失败，请检查网络连接","提示",JOptionPane.INFORMATION_MESSAGE);
+		}
 	}
 }
 

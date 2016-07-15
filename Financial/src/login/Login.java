@@ -6,9 +6,11 @@ import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -17,7 +19,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import common.DBcom;
+import com.mysql.jdbc.Statement;
+import common.Data;
+
 import entity.User;
 import function.InitMainData;
 import usermanage.SignUp;
@@ -106,37 +110,20 @@ public class Login {
 
 				}
 				String pw = password.getText();
-				String sql = "select * from user where id = "+un+" or name= '"+username+"'";
-				DBcom db=new DBcom();
-				Statement st=db.initState();
-				ResultSet rs = null;
-				try {
-					rs = db.query(sql);
-					user = null;
-					while (rs.next()) {
-						user = new User();
-						ID = rs.getInt("id");
-						username = rs.getString("name");
-						user.setID(ID);
-						user.setPassword(rs.getString("password"));
-						user.setName(username);
-					}
-					if (user != null) {
-						if (pw.equals(user.getPassword())) {
-							InitMainData.MAIN();
-							frmLogin.setVisible(false);
+				String query="select * from user where password = '"+pw+"'and name= '"+username+"'";
+				if(Data.linkTest())
+				{
+				user=Data.login(query);
+				if(user!=null){
+					InitMainData.MAIN();
+					frmLogin.setVisible(false);
 
-						} else {
-							JOptionPane.showMessageDialog(null, "密码输入错！请重新输入！");
-						}
-					} else {
-						JOptionPane.showMessageDialog(null, "该账号不存在！");
-					}
-				} catch (SQLException e2) {
-					// TODO 自动生成的 catch 块
-					e2.printStackTrace();
+				}else{
+					JOptionPane.showMessageDialog(null, "用户名或密码错误");
 				}
-				db.close(rs);
+				
+				}else
+				JOptionPane.showMessageDialog(null, "无法连接到服务器，请检查网络连接");
 			}
 		});
 		login.setBounds(82, 191, 93, 34);
@@ -158,6 +145,75 @@ public class Login {
 		password.setBounds(181, 116, 173, 28);
 		frmLogin.getContentPane().add(password);
 
+	}
+}
+
+class JDBC_Connection {
+	static String drivername = "com.mysql.jdbc.Driver";
+	static String url = "jdbc:mysql://localhost:3306/economic?useUnicode=true&characterEncoding=UTF-8";
+	static String name = "com";
+	static String password = "123456";
+	// 创建静态驱动块
+	static {
+		try {
+			Class.forName(drivername);// 创建驱动
+			System.out.println("创建驱动成功");
+		} catch (ClassNotFoundException e) {
+			System.out.println("创建驱动失败!请检查驱动!");
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * 连接数据库的方法
+	 * 
+	 * @return
+	 */
+	public static Connection getConnection() {
+		Connection conn = null;
+		try {
+			conn = (Connection) DriverManager.getConnection(url, name, password);// 创建连接
+			System.out.println("连接数据库成功！");
+		} catch (SQLException e) {
+			System.out.println("连接数据库失败！请检查url、username或者password");
+			e.printStackTrace();
+		}
+		return conn;
+	}
+
+	/**
+	 * 该方法用于关闭结果集、连接和Statement对象
+	 * 
+	 * @param rs
+	 * @param conn
+	 * @param stmt
+	 */
+	public static void free(ResultSet rs, Connection conn, Statement stmt) {
+
+		try {
+			if (rs != null)
+				rs.close();
+		} catch (SQLException e) {
+			System.out.println("关闭ResultSet失败！");
+			e.printStackTrace();
+		} finally {
+
+			try {
+				if (conn != null)
+					conn.close();
+			} catch (SQLException e) {
+				System.out.println("关闭Connection失败！");
+				e.printStackTrace();
+			} finally {
+				try {
+					if (stmt != null)
+						stmt.close();
+				} catch (SQLException e) {
+					System.out.println("关闭Statement失败！");
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 }
 

@@ -4,76 +4,73 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Toolkit;
-
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JTextField;
-
-import login.Login;
-
-import javax.swing.JButton;
-
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Connection;
-import java.sql.Statement;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+
+import login.Login;
+import common.Data;
+import entity.User;
+import function.InitMainData;
  
  
 
-class newDBHelper {  
-    public static final String url = "jdbc:mysql://127.0.0.1:3306/economic";  
-    public static final String name = "com.mysql.jdbc.Driver";  
-    public static final String user = "com";  
-    public static final String password ="123456";  
-  
-    public Connection conn = null;  
-    public PreparedStatement pst = null;  
-  
-    public newDBHelper(String sql) {  
-        try {  
-            Class.forName(name);//指定连接类型  
-            conn = DriverManager.getConnection(url, user, password);//获取连接  
-            pst = conn.prepareStatement(sql);//准备执行语句  
-        } catch (Exception e) {  
-            e.printStackTrace();  
-        }  
-        try {
-			pst.executeUpdate();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        
-        
-    }  
-  
-    public void close() {  
-        try {  
-            this.conn.close();  
-            this.pst.close();  
-        } catch (SQLException e) {  
-            e.printStackTrace();  
-        }  
-    }  
-}  
+//class newDBHelper {  
+//    public static final String url = "jdbc:mysql://127.0.0.1:3306/economic";  
+//    public static final String name = "com.mysql.jdbc.Driver";  
+//    public static final String user = "com";  
+//    public static final String password ="123456";  
+//  
+//    public Connection conn = null;  
+//    public PreparedStatement pst = null;  
+//  
+//    public newDBHelper(String sql) {  
+//        try {  
+//            Class.forName(name);//指定连接类型  
+//            conn = DriverManager.getConnection(url, user, password);//获取连接  
+//            pst = conn.prepareStatement(sql);//准备执行语句  
+//        } catch (Exception e) {  
+//            e.printStackTrace();  
+//        }  
+//        try {
+//			pst.executeUpdate();
+//		} catch (SQLException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//        
+//        
+//    }  
+//  
+//    public void close() {  
+//        try {  
+//            this.conn.close();  
+//            this.pst.close();  
+//        } catch (SQLException e) {  
+//            e.printStackTrace();  
+//        }  
+//    }  
+//}  
 
 
 public class UserUpdate implements ActionListener,KeyListener ,FocusListener {
 	final String aid = Login.user.getID()+"";
 	private JFrame frame;
+	private User user;
 	private JTextField textField;
 	private JTextField textField_5;
 	private JPasswordField passwordField;
@@ -144,23 +141,29 @@ public class UserUpdate implements ActionListener,KeyListener ,FocusListener {
 		lblNewLabel.setForeground(Color.RED);
 		lblNewLabel.setBounds(300, 55, 124, 15);
 		frame.getContentPane().add(lblNewLabel); 
-		Connection conn = null;
-		try {  
-				Class.forName("com.mysql.jdbc.Driver");//指定连接类型  
-				conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/economic", "com", "123456");//获取连接  
-				String sql="select * from user where id ="+ aid;
-				
-				PreparedStatement pst = conn.prepareStatement(sql);//准备执行语句  
-				ResultSet rs = pst.executeQuery();
-				while (rs.next())
-				{
-					bpassword = rs.getString("password");
-				}
-		} catch (Exception e1) {  
-            e1.printStackTrace();  
-        }  
-            
-
+//		Connection conn = null;
+		
+//		try {  
+//				Class.forName("com.mysql.jdbc.Driver");//指定连接类型  
+//				conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/economic", "com", "123456");//获取连接  
+//				String sql="select * from user where id ="+ aid;
+//				
+//				PreparedStatement pst = conn.prepareStatement(sql);//准备执行语句  
+//				ResultSet rs = pst.executeQuery();
+//				while (rs.next())
+//				{
+//					bpassword = rs.getString("password");
+//				}
+//		} catch (Exception e1) {  
+//            e1.printStackTrace();  
+//        }  
+		
+		
+		String query="select * from user where id ="+ aid;
+		user=Data.login(query);
+		bpassword = user.getPassword();
+		String aname= user.getName();
+		
 		
 		label_1.setForeground(Color.RED);
 		label_1.setBounds(300, 212, 124, 15);
@@ -174,18 +177,23 @@ public class UserUpdate implements ActionListener,KeyListener ,FocusListener {
 		
 		textField = new JTextField();
 		textField.setBounds(122, 46, 146, 21);
-		String sql="select name from user where id ="+ aid;
-		String aname = null;
-		try {  
-			PreparedStatement pst = conn.prepareStatement(sql);//准备执行语句  
-			ResultSet rs = pst.executeQuery();
-			while (rs.next())
-			{
-				aname = rs.getString("name");
-			}
-		 }catch (Exception e1) {  
-             e1.printStackTrace();  
-         }  
+		
+//		String sql="select name from user where id ="+ aid;
+//		String aname = null;
+		
+		
+		
+//		try {  
+//			PreparedStatement pst = conn.prepareStatement(sql);//准备执行语句  
+//			ResultSet rs = pst.executeQuery();
+//			while (rs.next())
+//			{
+//				aname = rs.getString("name");
+//			}
+//		 }catch (Exception e1) {  
+//             e1.printStackTrace();  
+//         }  
+		
 		textField.setText(aname);
 		frame.getContentPane().add(textField);
 		textField.setColumns(10);
@@ -204,18 +212,20 @@ public class UserUpdate implements ActionListener,KeyListener ,FocusListener {
 		
 		textField_5 = new JTextField();
 		textField_5.setBounds(122, 206, 146, 21);
-		String sql2="select mail from user where id ="+ aid;
-		String amail = null;
-		try {  
-			PreparedStatement pst = conn.prepareStatement(sql2);//准备执行语句  
-			ResultSet rs = pst.executeQuery();
-			while (rs.next())
-			{
-				amail = rs.getString("mail");
-			}
-		 }catch (Exception e1) {  
-             e1.printStackTrace();  
-         }  
+//		String sql2="select mail from user where id ="+ aid;
+		
+		String amail = user.getMail();
+		
+//		try {  
+//			PreparedStatement pst = conn.prepareStatement(sql2);//准备执行语句  
+//			ResultSet rs = pst.executeQuery();
+//			while (rs.next())
+//			{
+//				amail = rs.getString("mail");
+//			}
+//		 }catch (Exception e1) {  
+//             e1.printStackTrace();  
+//         }  
 		textField_5.setText(amail);
 		
 		frame.getContentPane().add(textField_5);
@@ -326,11 +336,11 @@ public class UserUpdate implements ActionListener,KeyListener ,FocusListener {
     }
     public void focusLost(FocusEvent e) {
         // TODO Auto-generated method stub
-        String nameString=textField.getText().trim();   
+        String nameString=textField.getText().trim();
         String pass=String.valueOf(passwordField.getPassword());
         String repass=String.valueOf(passwordField_1.getPassword());
         String apass=String.valueOf(passwordField_2.getPassword());
-        String mailString=textField_5.getText().trim();   
+        String mailString=textField_5.getText().trim();
  
         if (e.getSource()==textField) {
             if (nameString.equals("")) {
@@ -416,15 +426,26 @@ public class UserUpdate implements ActionListener,KeyListener ,FocusListener {
 	          int id=0;
 
 	          if (!nameString.equals("") && !pass.equals("") && pass.equals(repass) && !mailString.equals("")&&apass.equals(bpassword)&&isEmail(mailString)) {
-	              System.out.println("注册");
-	               sql=
-	                      "update user set name = '"+nameString+"',password='"+pass+"',mail='"+mailString+"' where id="+aid;
-	                               
-	              System.out.println(sql);
-	              newDBHelper b = new newDBHelper(sql);
-	              JOptionPane.showMessageDialog(null,"保存成功","提示",JOptionPane.INFORMATION_MESSAGE);
-				frame.setVisible(false);
-
+	        	  if(UserCheck.CheckUsername(nameString)){
+	        		  
+		        	  
+		        	  System.out.println("更新");
+		              String query=
+		                      "update user set name = '"+nameString+"',password='"+pass+"',mail='"+mailString+"' where id="+aid;
+		                               
+		              System.out.println(sql);
+		              
+		              System.out.println(query);
+		              if(Data.modify(query))	  
+		            	  JOptionPane.showMessageDialog(null,"保存成功","提示",JOptionPane.INFORMATION_MESSAGE);
+		              //newDBHelper b = new newDBHelper(sql);
+		              else
+		            	  JOptionPane.showMessageDialog(null,"请检查网络连接","失败",JOptionPane.INFORMATION_MESSAGE);
+		              
+					frame.setVisible(false);
+		        	  }else{
+		        		  JOptionPane.showMessageDialog(null,"用户名重复","失败",JOptionPane.INFORMATION_MESSAGE);
+		        	  }
 
 	          }           
 	      }
